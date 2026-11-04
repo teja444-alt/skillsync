@@ -2,30 +2,68 @@
 "use client";
 
 import { useState } from "react";
+import type { FormEvent } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { BrainCircuit, Mail, Lock, ArrowRight } from "lucide-react";
+import {
+  BrainCircuit,
+  Mail,
+  Lock,
+  ArrowRight,
+  ArrowLeft,
+} from "lucide-react";
+
+type AuthMode = "login" | "signup" | "forgot";
+
+interface LoginPageProps {
+  initialSignup?: boolean;
+}
 
 export default function LoginPage({
   initialSignup = false,
-}: {
-  initialSignup?: boolean;
-}) {
-  const [isSignup, setIsSignup] = useState(initialSignup);
+}: LoginPageProps) {
+  const [mode, setMode] = useState<AuthMode>(
+    initialSignup ? "signup" : "login"
+  );
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  async function handleEmailAuth(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
+  function changeMode(nextMode: AuthMode) {
+    setMode(nextMode);
     setError("");
+    setMessage("");
+  }
+
+  async function handleEmailAuth(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    setLoading(true);
+    setError("");
+    setMessage("");
 
     try {
-      if (isSignup) {
+      if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(
+          email,
+          {
+            redirectTo: `${window.location.origin}/reset-password`,
+          }
+        );
+
+        if (error) throw error;
+
+        setMessage(
+          "If an account exists for this email, a password reset link will be sent."
+        );
+
+        return;
+      }
+
+      if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -37,7 +75,7 @@ export default function LoginPage({
         if (error) throw error;
 
         setMessage(
-          "Account created! Check your email to verify your account."
+          "Account created successfully! Check your email if verification is required."
         );
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -51,7 +89,9 @@ export default function LoginPage({
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Something went wrong."
+        err instanceof Error
+          ? err.message
+          : "Something went wrong."
       );
     } finally {
       setLoading(false);
@@ -62,15 +102,21 @@ export default function LoginPage({
     setError("");
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/login`,
-      },
-    });
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
 
-    if (error) {
-      setError(error.message);
+      if (error) throw error;
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Google login failed."
+      );
       setLoading(false);
     }
   }
@@ -78,6 +124,7 @@ export default function LoginPage({
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#09090b] px-5 py-12 text-white">
       <div className="w-full max-w-md">
+
         <Link
           href="/"
           className="mb-8 flex items-center justify-center gap-2"
@@ -92,33 +139,49 @@ export default function LoginPage({
         </Link>
 
         <div className="rounded-2xl border border-zinc-800 bg-[#111114] p-8">
+
           <h1 className="text-2xl font-bold">
-            {isSignup ? "Create your account" : "Welcome back"}
+            {mode === "signup"
+              ? "Create your account"
+              : mode === "forgot"
+                ? "Reset your password"
+                : "Welcome back"}
           </h1>
 
           <p className="mt-2 text-sm text-zinc-400">
-            {isSignup
+            {mode === "signup"
               ? "Start building your career readiness profile."
-              : "Sign in to continue your career journey."}
+              : mode === "forgot"
+                ? "Enter your email to receive a password reset link."
+                : "Sign in to continue your career journey."}
           </p>
 
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="mt-7 flex w-full items-center justify-center gap-3 rounded-xl border border-zinc-700 py-3 font-medium transition hover:bg-zinc-900 disabled:opacity-50"
-          >
-            <span className="text-lg font-bold">G</span>
-            Continue with Google
-          </button>
+          {mode === "login" && (
+            <>
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="mt-7 flex w-full items-center justify-center gap-3 rounded-xl border border-zinc-700 py-3 font-medium transition hover:bg-zinc-900 disabled:opacity-50"
+              >
+                <span className="text-lg font-bold">G</span>
+                Continue with Google
+              </button>
 
-          <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-zinc-800" />
-            <span className="text-xs text-zinc-500">OR WITH EMAIL</span>
-            <div className="h-px flex-1 bg-zinc-800" />
-          </div>
+              <div className="my-6 flex items-center gap-3">
+                <div className="h-px flex-1 bg-zinc-800" />
+
+                <span className="text-xs text-zinc-500">
+                  OR WITH EMAIL
+                </span>
+
+                <div className="h-px flex-1 bg-zinc-800" />
+              </div>
+            </>
+          )}
 
           <form onSubmit={handleEmailAuth} className="space-y-4">
+
             <div>
               <label className="mb-2 block text-sm text-zinc-300">
                 Email address
@@ -138,25 +201,39 @@ export default function LoginPage({
               </div>
             </div>
 
-            <div>
-              <label className="mb-2 block text-sm text-zinc-300">
-                Password
-              </label>
+            {mode !== "forgot" && (
+              <div>
+                <label className="mb-2 block text-sm text-zinc-300">
+                  Password
+                </label>
 
-              <div className="flex items-center gap-3 rounded-xl border border-zinc-700 px-4 focus-within:border-violet-500">
-                <Lock size={18} className="text-zinc-500" />
+                <div className="flex items-center gap-3 rounded-xl border border-zinc-700 px-4 focus-within:border-violet-500">
+                  <Lock size={18} className="text-zinc-500" />
 
-                <input
-                  type="password"
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters"
-                  className="w-full bg-transparent py-3 text-sm outline-none"
-                />
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="At least 6 characters"
+                    className="w-full bg-transparent py-3 text-sm outline-none"
+                  />
+                </div>
               </div>
-            </div>
+            )}
+
+            {mode === "login" && (
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => changeMode("forgot")}
+                  className="text-sm text-violet-400 hover:text-violet-300"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
 
             {error && (
               <p className="rounded-lg bg-red-500/10 p-3 text-sm text-red-400">
@@ -177,36 +254,52 @@ export default function LoginPage({
             >
               {loading
                 ? "Please wait..."
-                : isSignup
+                : mode === "signup"
                   ? "Create account"
-                  : "Sign in"}
+                  : mode === "forgot"
+                    ? "Send reset link"
+                    : "Sign in"}
 
               {!loading && <ArrowRight size={18} />}
             </button>
+
           </form>
 
-          <p className="mt-6 text-center text-sm text-zinc-400">
-            {isSignup
-              ? "Already have an account?"
-              : "Don't have an account?"}{" "}
-
+          {mode === "forgot" ? (
             <button
               type="button"
-              onClick={() => {
-                setIsSignup(!isSignup);
-                setError("");
-                setMessage("");
-              }}
-              className="font-semibold text-violet-400 hover:text-violet-300"
+              onClick={() => changeMode("login")}
+              className="mt-6 flex w-full items-center justify-center gap-2 text-sm text-zinc-400 hover:text-white"
             >
-              {isSignup ? "Sign in" : "Sign up"}
+              <ArrowLeft size={16} />
+              Back to sign in
             </button>
-          </p>
+          ) : (
+            <p className="mt-6 text-center text-sm text-zinc-400">
+              {mode === "signup"
+                ? "Already have an account?"
+                : "Don't have an account?"}{" "}
+
+              <button
+                type="button"
+                onClick={() =>
+                  changeMode(
+                    mode === "signup" ? "login" : "signup"
+                  )
+                }
+                className="font-semibold text-violet-400 hover:text-violet-300"
+              >
+                {mode === "signup" ? "Sign in" : "Sign up"}
+              </button>
+            </p>
+          )}
+
         </div>
 
         <p className="mt-6 text-center text-xs text-zinc-600">
           By continuing, you agree to SkillSync's terms and privacy policy.
         </p>
+
       </div>
     </main>
   );
