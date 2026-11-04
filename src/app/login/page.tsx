@@ -6,15 +6,19 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { BrainCircuit, Mail, Lock, ArrowRight } from "lucide-react";
 
-export default function LoginPage() {
-  const [isSignup, setIsSignup] = useState(false);
+export default function LoginPage({
+  initialSignup = false,
+}: {
+  initialSignup?: boolean;
+}) {
+  const [isSignup, setIsSignup] = useState(initialSignup);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  async function handleEmailAuth(e: React.FormEvent) {
+  async function handleEmailAuth(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setMessage("");
@@ -74,10 +78,14 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#09090b] px-5 py-12 text-white">
       <div className="w-full max-w-md">
-        <Link href="/" className="mb-8 flex items-center justify-center gap-2">
+        <Link
+          href="/"
+          className="mb-8 flex items-center justify-center gap-2"
+        >
           <div className="rounded-xl bg-violet-600 p-2">
             <BrainCircuit size={22} />
           </div>
+
           <span className="text-2xl font-bold">
             Skill<span className="text-violet-400">Sync</span>
           </span>
@@ -100,7 +108,7 @@ export default function LoginPage() {
             disabled={loading}
             className="mt-7 flex w-full items-center justify-center gap-3 rounded-xl border border-zinc-700 py-3 font-medium transition hover:bg-zinc-900 disabled:opacity-50"
           >
-            <span className="font-bold text-lg">G</span>
+            <span className="text-lg font-bold">G</span>
             Continue with Google
           </button>
 
@@ -115,8 +123,10 @@ export default function LoginPage() {
               <label className="mb-2 block text-sm text-zinc-300">
                 Email address
               </label>
+
               <div className="flex items-center gap-3 rounded-xl border border-zinc-700 px-4 focus-within:border-violet-500">
                 <Mail size={18} className="text-zinc-500" />
+
                 <input
                   type="email"
                   required
@@ -132,8 +142,10 @@ export default function LoginPage() {
               <label className="mb-2 block text-sm text-zinc-300">
                 Password
               </label>
+
               <div className="flex items-center gap-3 rounded-xl border border-zinc-700 px-4 focus-within:border-violet-500">
                 <Lock size={18} className="text-zinc-500" />
+
                 <input
                   type="password"
                   required
@@ -168,6 +180,7 @@ export default function LoginPage() {
                 : isSignup
                   ? "Create account"
                   : "Sign in"}
+
               {!loading && <ArrowRight size={18} />}
             </button>
           </form>
@@ -176,6 +189,7 @@ export default function LoginPage() {
             {isSignup
               ? "Already have an account?"
               : "Don't have an account?"}{" "}
+
             <button
               type="button"
               onClick={() => {
