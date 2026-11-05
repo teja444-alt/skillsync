@@ -85,7 +85,6 @@ export default function ResumePage() {
     setAnalysis(null);
 
     try {
-      // Send resume to Gemini API
       const formData = new FormData();
       formData.append("resume", file);
 
@@ -111,10 +110,8 @@ export default function ResumePage() {
         throw new Error("Invalid analysis response from AI.");
       }
 
-      // Display analysis
       setAnalysis(analysisData);
 
-      // Get authenticated user
       const {
         data: { user },
         error: authError,
@@ -127,7 +124,6 @@ export default function ResumePage() {
         return;
       }
 
-      // Validate scores
       const validRoles = analysisData.roleAnalysis.filter(
         (role) =>
           typeof role.score === "number" &&
@@ -141,7 +137,6 @@ export default function ResumePage() {
         return;
       }
 
-      // Calculate average readiness
       const overallScore = Math.round(
         validRoles.reduce(
           (total, role) => total + role.score,
@@ -149,12 +144,10 @@ export default function ResumePage() {
         ) / validRoles.length
       );
 
-      // Find highest-scoring role
       const bestRole = [...validRoles].sort(
         (a, b) => b.score - a.score
       )[0];
 
-      // Save analysis in Supabase
       const { error: saveError } = await supabase
         .from("resume_analyses")
         .insert({
@@ -205,54 +198,66 @@ export default function ResumePage() {
       : 0;
 
   return (
-    <main className="min-h-screen bg-[#09090b] px-6 py-8 text-white">
-      <div className="mx-auto max-w-5xl">
+    <main className="min-h-screen bg-[#0B1220] px-4 py-8 text-slate-100 sm:px-6">
+      <div className="mx-auto max-w-6xl">
 
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white"
+          className="inline-flex items-center gap-2 text-sm text-slate-400 transition hover:text-blue-400"
         >
           <ArrowLeft size={16} />
           Back to dashboard
         </Link>
 
         <div className="mt-8 flex items-center gap-3">
-          <div className="rounded-xl bg-violet-600 p-3">
+          <div className="rounded-xl bg-blue-600 p-3 shadow-lg shadow-blue-600/20">
             <BrainCircuit size={24} />
           </div>
 
           <div>
-            <p className="text-sm text-violet-400">
+            <p className="text-sm font-semibold tracking-wider text-blue-400">
               SKILLSYNC AI
             </p>
-            <h1 className="text-3xl font-bold">
+            <h1 className="text-3xl font-bold tracking-tight">
               Resume Analysis
             </h1>
           </div>
         </div>
 
-        <p className="mt-4 max-w-2xl text-zinc-400">
+        <p className="mt-4 max-w-2xl leading-7 text-slate-400">
           Upload your resume to extract your skills, education,
           experience, projects, and analyze your readiness
           across job roles.
         </p>
 
         {/* Resume Upload */}
-        <section className="mt-8 rounded-2xl border border-zinc-800 bg-[#111114] p-6">
+        <section className="mt-8 rounded-2xl border border-slate-700/70 bg-[#111C30] p-6 shadow-xl shadow-black/10">
+          <div className="mb-5">
+            <h2 className="text-xl font-semibold">
+              Upload your resume
+            </h2>
+            <p className="mt-1 text-sm text-slate-400">
+              Let AI analyze your profile and identify career opportunities.
+            </p>
+          </div>
+
           <label
             htmlFor="resume"
-            className="flex cursor-pointer flex-col items-center rounded-xl border-2 border-dashed border-zinc-700 px-6 py-12 text-center hover:border-violet-500"
+            className="flex cursor-pointer flex-col items-center rounded-xl border-2 border-dashed border-slate-600 bg-[#0B1220]/60 px-6 py-12 text-center transition hover:border-blue-500 hover:bg-blue-500/5"
           >
-            <Upload
-              size={36}
-              className="text-violet-400"
-            />
+            <div className="rounded-2xl bg-blue-500/10 p-4">
+              <Upload size={36} className="text-blue-400" />
+            </div>
 
             <span className="mt-4 text-lg font-semibold">
-              Upload your resume
+              Choose your PDF resume
             </span>
 
-            <span className="mt-2 text-sm text-zinc-400">
+            <span className="mt-2 text-sm text-slate-400">
+              Click to browse or select a file
+            </span>
+
+            <span className="mt-2 text-xs text-slate-500">
               PDF format only · Maximum 5 MB
             </span>
 
@@ -271,28 +276,28 @@ export default function ResumePage() {
           </label>
 
           {file && (
-            <div className="mt-4 flex items-center gap-3 rounded-lg bg-zinc-900 p-4">
-              <FileText className="text-violet-400" />
+            <div className="mt-4 flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/10 p-4">
+              <FileText className="shrink-0 text-blue-400" />
 
-              <span className="flex-1 truncate text-sm">
+              <span className="flex-1 truncate text-sm text-slate-200">
                 {file.name}
               </span>
 
               <CheckCircle2
                 size={18}
-                className="text-green-400"
+                className="shrink-0 text-green-400"
               />
             </div>
           )}
 
           {error && (
-            <p className="mt-4 rounded-lg bg-red-500/10 p-3 text-sm text-red-400">
+            <p className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
               {error}
             </p>
           )}
 
           {success && (
-            <p className="mt-4 rounded-lg bg-green-500/10 p-3 text-sm text-green-400">
+            <p className="mt-4 rounded-lg border border-green-500/20 bg-green-500/10 p-3 text-sm text-green-400">
               {success}
             </p>
           )}
@@ -300,7 +305,7 @@ export default function ResumePage() {
           <button
             onClick={handleAnalyze}
             disabled={!file || loading}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-3 font-semibold hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3.5 font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -324,34 +329,34 @@ export default function ResumePage() {
           <div className="mt-8 space-y-6">
 
             {/* Overall Score */}
-            <section className="rounded-2xl border border-violet-500/30 bg-[#111114] p-6">
+            <section className="rounded-2xl border border-blue-500/30 bg-[#111C30] p-6 shadow-xl shadow-black/10">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm text-violet-400">
+                  <p className="text-sm font-semibold tracking-wider text-blue-400">
                     OVERALL JOB READINESS
                   </p>
 
-                  <h2 className="mt-2 text-4xl font-bold">
+                  <h2 className="mt-2 text-5xl font-bold">
                     {averageScore}%
                   </h2>
 
-                  <p className="mt-2 text-sm text-zinc-400">
+                  <p className="mt-2 text-sm text-slate-400">
                     Average readiness across{" "}
                     {validScores.length} analyzed job roles.
                   </p>
                 </div>
 
-                <div className="rounded-full border-4 border-violet-500 p-5">
+                <div className="rounded-full border-4 border-blue-500/40 bg-blue-500/10 p-5">
                   <Target
                     size={36}
-                    className="text-violet-400"
+                    className="text-blue-400"
                   />
                 </div>
               </div>
 
-              <div className="mt-5 h-3 overflow-hidden rounded-full bg-zinc-800">
+              <div className="mt-6 h-3 overflow-hidden rounded-full bg-slate-800">
                 <div
-                  className="h-full rounded-full bg-violet-500"
+                  className="h-full rounded-full bg-blue-500 transition-all duration-700"
                   style={{
                     width: `${Math.min(100, Math.max(0, averageScore))}%`,
                   }}
@@ -360,8 +365,8 @@ export default function ResumePage() {
             </section>
 
             {/* Candidate Summary */}
-            <section className="rounded-2xl border border-zinc-800 bg-[#111114] p-6">
-              <p className="text-sm text-violet-400">
+            <section className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-6">
+              <p className="text-sm font-semibold tracking-wider text-blue-400">
                 ANALYSIS COMPLETE
               </p>
 
@@ -369,25 +374,22 @@ export default function ResumePage() {
                 {analysis.candidateName}
               </h2>
 
-              <p className="mt-3 leading-7 text-zinc-300">
+              <p className="mt-3 leading-7 text-slate-300">
                 {analysis.summary}
               </p>
             </section>
 
             {/* Job Role Readiness */}
-            <section className="rounded-2xl border border-zinc-800 bg-[#111114] p-6">
+            <section className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-6">
               <div className="flex items-center gap-3">
-                <Target
-                  className="text-violet-400"
-                  size={22}
-                />
+                <Target className="text-blue-400" size={22} />
 
                 <div>
                   <h2 className="text-xl font-bold">
                     Job Role Readiness
                   </h2>
 
-                  <p className="mt-1 text-sm text-zinc-400">
+                  <p className="mt-1 text-sm text-slate-400">
                     AI-estimated resume match across different job roles.
                   </p>
                 </div>
@@ -398,21 +400,21 @@ export default function ResumePage() {
                   {analysis.roleAnalysis.map((role) => (
                     <div
                       key={role.role}
-                      className="rounded-xl border border-zinc-800 bg-zinc-900/70 p-5"
+                      className="rounded-xl border border-slate-700/70 bg-[#0B1220]/80 p-5 transition hover:border-blue-500/40"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <h3 className="font-semibold">
                           {role.role}
                         </h3>
 
-                        <span className="rounded-lg bg-violet-500/15 px-3 py-1 text-sm font-bold text-violet-300">
+                        <span className="rounded-lg bg-blue-500/15 px-3 py-1 text-sm font-bold text-blue-300">
                           {role.score}/100
                         </span>
                       </div>
 
-                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-zinc-800">
+                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-800">
                         <div
-                          className="h-full rounded-full bg-violet-500"
+                          className="h-full rounded-full bg-blue-500"
                           style={{
                             width: `${Math.min(
                               100,
@@ -422,7 +424,7 @@ export default function ResumePage() {
                         />
                       </div>
 
-                      <p className="mt-3 text-sm text-zinc-400">
+                      <p className="mt-3 text-sm text-slate-400">
                         Readiness:{" "}
                         <span className="font-medium text-white">
                           {role.readiness}
@@ -452,7 +454,7 @@ export default function ResumePage() {
                       </div>
 
                       <div className="mt-4">
-                        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-violet-300">
+                        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-blue-300">
                           <Lightbulb size={14} />
                           Recommended to Learn
                         </p>
@@ -478,26 +480,23 @@ export default function ResumePage() {
                   ))}
                 </div>
               ) : (
-                <p className="mt-4 text-sm text-zinc-500">
+                <p className="mt-4 text-sm text-slate-400">
                   Role analysis is not available.
                 </p>
               )}
             </section>
 
             {/* Learning Roadmap */}
-            <section className="rounded-2xl border border-zinc-800 bg-[#111114] p-6">
+            <section className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-6">
               <div className="flex items-center gap-3">
-                <BookOpen
-                  className="text-violet-400"
-                  size={22}
-                />
+                <BookOpen className="text-blue-400" size={22} />
 
                 <div>
                   <h2 className="text-xl font-bold">
                     Personalized Learning Roadmap
                   </h2>
 
-                  <p className="mt-1 text-sm text-zinc-400">
+                  <p className="mt-1 text-sm text-slate-400">
                     A practical 4-week plan based on your missing skills.
                   </p>
                 </div>
@@ -508,14 +507,14 @@ export default function ResumePage() {
                   {analysis.learningRoadmap.map((roadmap) => (
                     <div
                       key={roadmap.role}
-                      className="rounded-xl border border-zinc-800 bg-zinc-900/70 p-5"
+                      className="rounded-xl border border-slate-700/70 bg-[#0B1220]/80 p-5"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <h3 className="text-lg font-semibold">
                           {roadmap.role}
                         </h3>
 
-                        <span className="rounded-full bg-violet-500/15 px-3 py-1 text-sm font-medium text-violet-300">
+                        <span className="rounded-full bg-blue-500/15 px-3 py-1 text-sm font-medium text-blue-300">
                           {roadmap.estimatedDuration}
                         </span>
                       </div>
@@ -524,15 +523,15 @@ export default function ResumePage() {
                         {roadmap.steps?.map((step) => (
                           <div
                             key={`${roadmap.role}-week-${step.week}`}
-                            className="rounded-lg border border-zinc-800 bg-[#09090b] p-4"
+                            className="rounded-lg border border-slate-700/70 bg-[#0B1220] p-4"
                           >
                             <div className="flex items-center gap-2">
                               <CalendarDays
                                 size={16}
-                                className="text-violet-400"
+                                className="text-blue-400"
                               />
 
-                              <h4 className="font-semibold text-violet-300">
+                              <h4 className="font-semibold text-blue-300">
                                 Week {step.week}
                               </h4>
                             </div>
@@ -542,7 +541,7 @@ export default function ResumePage() {
                             </p>
 
                             <div className="mt-4">
-                              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                                 Skills to learn
                               </p>
 
@@ -553,26 +552,26 @@ export default function ResumePage() {
                             </div>
 
                             <div className="mt-4">
-                              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                                 Practice task
                               </p>
 
-                              <p className="mt-2 text-sm leading-6 text-zinc-300">
+                              <p className="mt-2 text-sm leading-6 text-slate-300">
                                 {step.practiceTask}
                               </p>
                             </div>
 
                             <div className="mt-4">
-                              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                                 Project
                               </p>
 
-                              <p className="mt-2 text-sm leading-6 text-zinc-300">
+                              <p className="mt-2 text-sm leading-6 text-slate-300">
                                 {step.project}
                               </p>
                             </div>
 
-                            <div className="mt-4 rounded-lg bg-green-500/10 p-3">
+                            <div className="mt-4 rounded-lg border border-green-500/10 bg-green-500/10 p-3">
                               <p className="text-xs font-semibold uppercase tracking-wide text-green-400">
                                 Expected outcome
                               </p>
@@ -637,13 +636,13 @@ function SkillList({
   const colors = {
     green: "border-green-500/20 bg-green-500/10 text-green-200",
     red: "border-red-500/20 bg-red-500/10 text-red-200",
-    violet: "border-violet-500/20 bg-violet-500/10 text-violet-200",
+    violet: "border-blue-500/20 bg-blue-500/10 text-blue-200",
     blue: "border-blue-500/20 bg-blue-500/10 text-blue-200",
   };
 
   if (!items?.length) {
     return (
-      <p className="mt-2 text-sm text-zinc-500">
+      <p className="mt-2 text-sm text-slate-400">
         None listed.
       </p>
     );
@@ -671,7 +670,7 @@ function ResultSection({
   items: string[];
 }) {
   return (
-    <section className="rounded-2xl border border-zinc-800 bg-[#111114] p-6">
+    <section className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-6 shadow-lg shadow-black/10">
       <h2 className="text-lg font-semibold">{title}</h2>
 
       {items?.length > 0 ? (
@@ -679,14 +678,14 @@ function ResultSection({
           {items.map((item, index) => (
             <span
               key={`${item}-${index}`}
-              className="rounded-lg border border-violet-500/20 bg-violet-500/10 px-3 py-2 text-sm text-violet-200"
+              className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-2 text-sm text-blue-200"
             >
               {item}
             </span>
           ))}
         </div>
       ) : (
-        <p className="mt-3 text-sm text-zinc-500">
+        <p className="mt-3 text-sm text-slate-400">
           No information found.
         </p>
       )}

@@ -121,9 +121,12 @@ export default function InterviewHistoryPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#09090b] text-white">
-        <div className="flex items-center gap-3 text-zinc-400">
-          <LoaderCircle className="animate-spin" size={22} />
+      <main className="flex min-h-screen items-center justify-center bg-[#0B1220] text-slate-100">
+        <div className="flex items-center gap-3 text-slate-400">
+          <LoaderCircle
+            className="animate-spin text-blue-400"
+            size={22}
+          />
           Loading interview history...
         </div>
       </main>
@@ -131,28 +134,28 @@ export default function InterviewHistoryPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#09090b] px-4 py-8 text-white sm:px-8">
+    <main className="min-h-screen bg-[#0B1220] px-4 py-8 text-slate-100 sm:px-8">
       <div className="mx-auto max-w-5xl">
 
         {/* Header */}
         <button
           onClick={() => router.push("/dashboard")}
-          className="mb-8 flex items-center gap-2 text-sm text-zinc-400 hover:text-white"
+          className="mb-8 flex items-center gap-2 text-sm text-slate-400 transition hover:text-blue-400"
         >
           <ArrowLeft size={18} />
           Back to Dashboard
         </button>
 
         <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-violet-400">
+          <p className="text-sm font-semibold uppercase tracking-widest text-blue-400">
             SkillSync AI
           </p>
 
-          <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
+          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
             Interview History
           </h1>
 
-          <p className="mt-3 text-zinc-400">
+          <p className="mt-3 text-slate-400">
             Review your previous interviews and track your performance.
           </p>
         </div>
@@ -168,32 +171,38 @@ export default function InterviewHistoryPage() {
         {interviews.length > 0 && (
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
 
-            <div className="rounded-2xl border border-zinc-800 bg-[#111114] p-5">
-              <MessageSquare className="text-violet-400" size={24} />
+            <div className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-5">
+              <MessageSquare className="text-blue-400" size={24} />
+
               <p className="mt-4 text-3xl font-bold">
                 {interviews.length}
               </p>
-              <p className="mt-1 text-sm text-zinc-400">
+
+              <p className="mt-1 text-sm text-slate-400">
                 Completed Interviews
               </p>
             </div>
 
-            <div className="rounded-2xl border border-zinc-800 bg-[#111114] p-5">
-              <Target className="text-cyan-400" size={24} />
+            <div className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-5">
+              <Target className="text-blue-400" size={24} />
+
               <p className="mt-4 text-3xl font-bold">
                 {averageScore}%
               </p>
-              <p className="mt-1 text-sm text-zinc-400">
+
+              <p className="mt-1 text-sm text-slate-400">
                 Average Score
               </p>
             </div>
 
-            <div className="rounded-2xl border border-zinc-800 bg-[#111114] p-5">
+            <div className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-5">
               <Trophy className="text-yellow-400" size={24} />
+
               <p className="mt-4 text-3xl font-bold">
                 {bestScore}%
               </p>
-              <p className="mt-1 text-sm text-zinc-400">
+
+              <p className="mt-1 text-sm text-slate-400">
                 Best Score
               </p>
             </div>
@@ -203,24 +212,24 @@ export default function InterviewHistoryPage() {
 
         {/* Empty State */}
         {interviews.length === 0 && !error && (
-          <div className="mt-10 rounded-2xl border border-zinc-800 bg-[#111114] p-10 text-center">
+          <div className="mt-10 rounded-2xl border border-slate-700/70 bg-[#111C30] p-10 text-center">
             <MessageSquare
               size={45}
-              className="mx-auto text-violet-400"
+              className="mx-auto text-blue-400"
             />
 
             <h2 className="mt-5 text-xl font-semibold">
               No interview history yet
             </h2>
 
-            <p className="mt-3 text-sm text-zinc-400">
+            <p className="mt-3 text-sm text-slate-400">
               Complete your first AI mock interview to see your
               scores and feedback here.
             </p>
 
             <button
               onClick={() => router.push("/mock-interview")}
-              className="mt-6 rounded-xl bg-violet-600 px-6 py-3 font-semibold hover:bg-violet-500"
+              className="mt-6 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-500"
             >
               Start Your First Interview
             </button>
@@ -236,7 +245,7 @@ export default function InterviewHistoryPage() {
             return (
               <section
                 key={interview.id}
-                className="overflow-hidden rounded-2xl border border-zinc-800 bg-[#111114]"
+                className="overflow-hidden rounded-2xl border border-slate-700/70 bg-[#111C30] shadow-lg shadow-black/10"
               >
                 {/* Interview Summary */}
                 <div className="p-5 sm:p-6">
@@ -244,7 +253,7 @@ export default function InterviewHistoryPage() {
                   <div className="flex flex-wrap items-center justify-between gap-4">
 
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-widest text-violet-400">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-blue-400">
                         Interview #{interviews.length - index}
                       </p>
 
@@ -252,7 +261,7 @@ export default function InterviewHistoryPage() {
                         {interview.role}
                       </h2>
 
-                      <p className="mt-2 flex items-center gap-2 text-sm text-zinc-400">
+                      <p className="mt-2 flex items-center gap-2 text-sm text-slate-400">
                         <CalendarDays size={15} />
                         {formatDate(interview.created_at)}
                       </p>
@@ -267,7 +276,7 @@ export default function InterviewHistoryPage() {
                         {interview.overall_score ?? 0}%
                       </p>
 
-                      <p className="mt-1 text-xs text-zinc-400">
+                      <p className="mt-1 text-xs text-slate-400">
                         Interview Score
                       </p>
                     </div>
@@ -275,9 +284,9 @@ export default function InterviewHistoryPage() {
                   </div>
 
                   {feedback && (
-                    <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-zinc-800 pt-4">
+                    <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-700 pt-4">
 
-                      <span className="rounded-full bg-violet-500/10 px-3 py-1.5 text-sm text-violet-300">
+                      <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-sm text-blue-300">
                         {feedback.performance}
                       </span>
 
@@ -287,7 +296,7 @@ export default function InterviewHistoryPage() {
                             isExpanded ? null : interview.id
                           )
                         }
-                        className="flex items-center gap-2 text-sm font-semibold text-violet-400 hover:text-violet-300"
+                        className="flex items-center gap-2 text-sm font-semibold text-blue-400 transition hover:text-blue-300"
                       >
                         {isExpanded ? "Hide Details" : "View Details"}
 
@@ -305,26 +314,26 @@ export default function InterviewHistoryPage() {
 
                 {/* Expanded Feedback */}
                 {isExpanded && feedback && (
-                  <div className="space-y-6 border-t border-zinc-800 bg-[#0c0c0f] p-5 sm:p-6">
+                  <div className="space-y-6 border-t border-slate-700 bg-[#0B1220] p-5 sm:p-6">
 
                     <div>
                       <h3 className="font-semibold">
                         Overall Feedback
                       </h3>
 
-                      <p className="mt-2 text-sm leading-6 text-zinc-400">
+                      <p className="mt-2 text-sm leading-6 text-slate-400">
                         {feedback.summary}
                       </p>
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2">
 
-                      <div className="rounded-xl border border-zinc-800 p-4">
+                      <div className="rounded-xl border border-slate-700/70 bg-[#111C30] p-4">
                         <h3 className="font-semibold text-green-400">
                           Strengths
                         </h3>
 
-                        <ul className="mt-3 space-y-2 text-sm text-zinc-300">
+                        <ul className="mt-3 space-y-2 text-sm text-slate-300">
                           {(feedback.strengths || []).map(
                             (item, i) => (
                               <li key={i}>✓ {item}</li>
@@ -333,12 +342,12 @@ export default function InterviewHistoryPage() {
                         </ul>
                       </div>
 
-                      <div className="rounded-xl border border-zinc-800 p-4">
+                      <div className="rounded-xl border border-slate-700/70 bg-[#111C30] p-4">
                         <h3 className="font-semibold text-yellow-400">
                           Areas to Improve
                         </h3>
 
-                        <ul className="mt-3 space-y-2 text-sm text-zinc-300">
+                        <ul className="mt-3 space-y-2 text-sm text-slate-300">
                           {(feedback.improvements || []).map(
                             (item, i) => (
                               <li key={i}>• {item}</li>
@@ -359,40 +368,40 @@ export default function InterviewHistoryPage() {
                           (result, i) => (
                             <div
                               key={i}
-                              className="rounded-xl border border-zinc-800 p-4"
+                              className="rounded-xl border border-slate-700/70 bg-[#111C30] p-4"
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <h4 className="font-medium">
                                   Q{i + 1}. {result.question}
                                 </h4>
 
-                                <span className="shrink-0 rounded-lg bg-violet-500/10 px-3 py-1 text-sm font-bold text-violet-300">
+                                <span className="shrink-0 rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-sm font-bold text-blue-300">
                                   {result.score}/10
                                 </span>
                               </div>
 
-                              <p className="mt-4 text-xs font-semibold uppercase text-zinc-500">
+                              <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
                                 Your Answer
                               </p>
 
-                              <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-zinc-300">
+                              <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-300">
                                 {result.answer || "No answer provided."}
                               </p>
 
-                              <p className="mt-4 text-xs font-semibold uppercase text-zinc-500">
+                              <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
                                 AI Feedback
                               </p>
 
-                              <p className="mt-2 text-sm leading-6 text-zinc-300">
+                              <p className="mt-2 text-sm leading-6 text-slate-300">
                                 {result.feedback}
                               </p>
 
-                              <div className="mt-4 rounded-lg bg-zinc-900 p-4">
-                                <p className="text-xs font-semibold uppercase text-cyan-400">
+                              <div className="mt-4 rounded-lg border border-blue-500/10 bg-[#0B1220] p-4">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-blue-400">
                                   Example Ideal Answer
                                 </p>
 
-                                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-zinc-300">
+                                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-300">
                                   {result.idealAnswer}
                                 </p>
                               </div>
@@ -413,7 +422,7 @@ export default function InterviewHistoryPage() {
         {interviews.length > 0 && (
           <button
             onClick={() => router.push("/mock-interview")}
-            className="mt-8 w-full rounded-xl bg-violet-600 px-6 py-3 font-semibold hover:bg-violet-500"
+            className="mt-8 w-full rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-500"
           >
             Start Another Interview
           </button>

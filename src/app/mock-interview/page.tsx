@@ -2,6 +2,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  BrainCircuit,
+  BriefcaseBusiness,
+  CheckCircle2,
+  Circle,
+  Loader2,
+  Trophy,
+  Target,
+  Lightbulb,
+  TrendingUp,
+  RotateCcw,
+  Sparkles,
+} from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 const ROLES = [
@@ -234,23 +249,42 @@ export default function MockInterviewPage() {
   ).length;
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-8 text-white sm:px-8">
-      <div className="mx-auto max-w-4xl">
+    <main className="min-h-screen bg-[#0B1220] px-4 py-8 text-slate-100 sm:px-8">
+      <div className="mx-auto max-w-5xl">
+
+        {/* Header */}
         <div className="mb-8">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-cyan-400">
-            SkillSync AI
-          </p>
+          <Link
+            href="/dashboard"
+            className="mb-6 inline-flex items-center gap-2 text-sm text-slate-400 transition hover:text-blue-400"
+          >
+            <ArrowLeft size={17} />
+            Back to Dashboard
+          </Link>
 
-          <h1 className="text-3xl font-bold sm:text-4xl">
-            AI Mock Interview
-          </h1>
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-3">
+              <BrainCircuit size={28} className="text-blue-400" />
+            </div>
 
-          <p className="mt-3 text-slate-400">
+            <div>
+              <p className="mb-1 text-sm font-semibold uppercase tracking-widest text-blue-400">
+                SkillSync AI
+              </p>
+
+              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                AI Mock Interview
+              </h1>
+            </div>
+          </div>
+
+          <p className="mt-3 max-w-2xl leading-7 text-slate-400">
             Practice technical interviews, get evaluated, and improve
-            your job readiness.
+            your job readiness with AI-powered feedback.
           </p>
         </div>
 
+        {/* Error */}
         {error && (
           <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
             {error}
@@ -259,10 +293,22 @@ export default function MockInterviewPage() {
 
         {/* Role selection */}
         {!evaluation && (
-          <section className="mb-6 rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="mb-4 text-xl font-semibold">
-              Choose your interview role
-            </h2>
+          <section className="mb-6 rounded-2xl border border-slate-700/70 bg-[#111C30] p-6 shadow-xl shadow-black/10">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="rounded-lg bg-blue-500/10 p-2">
+                <BriefcaseBusiness className="text-blue-400" size={22} />
+              </div>
+
+              <div>
+                <h2 className="text-xl font-semibold">
+                  Choose your interview role
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-400">
+                  Select the position you want to prepare for.
+                </p>
+              </div>
+            </div>
 
             <select
               value={role}
@@ -271,7 +317,7 @@ export default function MockInterviewPage() {
                 restartInterview();
               }}
               disabled={loading || questions.length > 0}
-              className="w-full rounded-xl border border-slate-700 bg-slate-950 p-3 text-white outline-none focus:border-cyan-400"
+              className="w-full rounded-xl border border-slate-700 bg-[#0B1220] p-3 text-white outline-none transition focus:border-blue-500 disabled:opacity-60"
             >
               {ROLES.map((item) => (
                 <option key={item} value={item}>
@@ -281,12 +327,12 @@ export default function MockInterviewPage() {
             </select>
 
             {resumeSummary ? (
-              <p className="mt-3 text-sm text-green-400">
-                <span className="mr-2">✓</span>
+              <p className="mt-4 flex items-center gap-2 text-sm text-green-400">
+                <CheckCircle2 size={17} />
                 Latest resume analysis connected.
               </p>
             ) : (
-              <p className="mt-3 text-sm text-amber-400">
+              <p className="mt-4 text-sm text-amber-400">
                 No resume analysis found. Questions will be generated
                 using the selected role only.
               </p>
@@ -296,9 +342,19 @@ export default function MockInterviewPage() {
               <button
                 onClick={startInterview}
                 disabled={loading}
-                className="mt-6 w-full rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3.5 font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading ? "Generating questions..." : "Start Interview"}
+                {loading ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Generating questions...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={18} />
+                    Start Interview
+                  </>
+                )}
               </button>
             )}
           </section>
@@ -306,23 +362,30 @@ export default function MockInterviewPage() {
 
         {/* Interview questions */}
         {questions.length > 0 && !evaluation && (
-          <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <section className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-6 shadow-xl shadow-black/10">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-xl font-semibold">{role}</h2>
+                <p className="text-sm font-semibold uppercase tracking-wider text-blue-400">
+                  Live Practice Session
+                </p>
+
+                <h2 className="mt-1 text-xl font-semibold">
+                  {role}
+                </h2>
+
                 <p className="mt-1 text-sm text-slate-400">
                   Question {currentQuestion + 1} of {questions.length}
                 </p>
               </div>
 
-              <span className="rounded-full bg-cyan-500/10 px-3 py-1 text-sm text-cyan-300">
+              <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-sm font-medium text-blue-300">
                 {answeredCount}/5 answered
               </span>
             </div>
 
             <div className="mb-6 h-2 overflow-hidden rounded-full bg-slate-800">
               <div
-                className="h-full rounded-full bg-cyan-400 transition-all"
+                className="h-full rounded-full bg-blue-500 transition-all"
                 style={{
                   width: `${((currentQuestion + 1) / questions.length) * 100}%`,
                 }}
@@ -330,25 +393,31 @@ export default function MockInterviewPage() {
             </div>
 
             <div className="mb-5 flex flex-wrap gap-2">
-              <span className="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-300">
+              <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs text-blue-300">
                 {questions[currentQuestion].topic}
               </span>
 
-              <span className="rounded-full bg-purple-500/10 px-3 py-1 text-xs text-purple-300">
+              <span className="rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-xs text-slate-300">
                 {questions[currentQuestion].difficulty}
               </span>
             </div>
 
-            <h3 className="mb-5 text-lg font-semibold leading-relaxed">
-              {questions[currentQuestion].question}
-            </h3>
+            <div className="mb-5 rounded-xl border border-slate-700/60 bg-[#0B1220]/70 p-5">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-blue-400">
+                Question {currentQuestion + 1}
+              </p>
+
+              <h3 className="text-lg font-semibold leading-relaxed">
+                {questions[currentQuestion].question}
+              </h3>
+            </div>
 
             <textarea
               value={answers[currentQuestion] || ""}
               onChange={(e) => updateAnswer(e.target.value)}
               placeholder="Write your answer here..."
               rows={7}
-              className="w-full resize-y rounded-xl border border-slate-700 bg-slate-950 p-4 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
+              className="w-full resize-y rounded-xl border border-slate-700 bg-[#0B1220] p-4 text-white outline-none placeholder:text-slate-500 transition focus:border-blue-500"
             />
 
             <div className="mt-6 flex flex-wrap justify-between gap-3">
@@ -359,7 +428,7 @@ export default function MockInterviewPage() {
                   )
                 }
                 disabled={currentQuestion === 0 || loading}
-                className="rounded-xl border border-slate-700 px-5 py-3 text-sm font-medium hover:bg-slate-800 disabled:opacity-40"
+                className="rounded-xl border border-slate-700 px-5 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:opacity-40"
               >
                 Previous
               </button>
@@ -370,7 +439,7 @@ export default function MockInterviewPage() {
                     setCurrentQuestion((previous) => previous + 1)
                   }
                   disabled={loading}
-                  className="rounded-xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-400"
+                  className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
                 >
                   Next Question
                 </button>
@@ -378,16 +447,21 @@ export default function MockInterviewPage() {
                 <button
                   onClick={submitInterview}
                   disabled={loading || answeredCount !== 5}
-                  className="rounded-xl bg-green-500 px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-xl bg-green-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-green-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {loading
-                    ? "Evaluating answers..."
-                    : "Submit Interview"}
+                  {loading ? (
+                    <>
+                      <Loader2 size={16} className="mr-2 inline animate-spin" />
+                      Evaluating answers...
+                    </>
+                  ) : (
+                    "Submit Interview"
+                  )}
                 </button>
               )}
             </div>
 
-            <div className="mt-6 border-t border-slate-800 pt-5">
+            <div className="mt-6 border-t border-slate-700 pt-5">
               <p className="mb-3 text-sm text-slate-400">
                 Jump to a question:
               </p>
@@ -397,15 +471,19 @@ export default function MockInterviewPage() {
                   <button
                     key={question.id}
                     onClick={() => setCurrentQuestion(index)}
-                    className={`h-10 w-10 rounded-lg text-sm font-semibold ${
+                    className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-semibold transition ${
                       currentQuestion === index
-                        ? "bg-cyan-500 text-slate-950"
+                        ? "bg-blue-600 text-white"
                         : answers[index]?.trim()
-                          ? "bg-green-500/20 text-green-300"
-                          : "bg-slate-800 text-slate-300"
+                          ? "border border-green-500/30 bg-green-500/10 text-green-300"
+                          : "bg-slate-800 text-slate-300 hover:bg-slate-700"
                     }`}
                   >
-                    {index + 1}
+                    {answers[index]?.trim() ? (
+                      <CheckCircle2 size={17} />
+                    ) : (
+                      index + 1
+                    )}
                   </button>
                 ))}
               </div>
@@ -416,12 +494,18 @@ export default function MockInterviewPage() {
         {/* Evaluation results */}
         {evaluation && (
           <div className="space-y-6">
-            <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6 text-center">
-              <p className="text-sm uppercase tracking-widest text-slate-400">
-                Your interview score
+
+            {/* Overall Score */}
+            <section className="rounded-2xl border border-blue-500/30 bg-[#111C30] p-7 text-center shadow-xl shadow-black/10">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-500/10">
+                <Trophy size={30} className="text-blue-400" />
+              </div>
+
+              <p className="text-sm font-semibold uppercase tracking-widest text-slate-400">
+                Your Interview Score
               </p>
 
-              <div className="my-5 text-6xl font-bold text-cyan-400">
+              <div className="my-5 text-6xl font-bold text-blue-400">
                 {evaluation.overallScore}%
               </div>
 
@@ -440,9 +524,11 @@ export default function MockInterviewPage() {
               )}
             </section>
 
+            {/* Strengths and Improvements */}
             <section className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-                <h3 className="mb-4 font-semibold text-green-400">
+              <div className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-5">
+                <h3 className="mb-4 flex items-center gap-2 font-semibold text-green-400">
+                  <CheckCircle2 size={19} />
                   Strengths
                 </h3>
 
@@ -453,8 +539,9 @@ export default function MockInterviewPage() {
                 </ul>
               </div>
 
-              <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-                <h3 className="mb-4 font-semibold text-amber-400">
+              <div className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-5">
+                <h3 className="mb-4 flex items-center gap-2 font-semibold text-amber-400">
+                  <TrendingUp size={19} />
                   Areas to improve
                 </h3>
 
@@ -466,33 +553,36 @@ export default function MockInterviewPage() {
               </div>
             </section>
 
+            {/* Question-wise Feedback */}
             <section className="space-y-4">
-              <h2 className="text-xl font-bold">Question-wise feedback</h2>
+              <h2 className="text-xl font-bold">
+                Question-wise feedback
+              </h2>
 
               {evaluation.results.map((item, index) => (
                 <div
                   key={index}
-                  className="rounded-2xl border border-slate-800 bg-slate-900 p-5"
+                  className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-5"
                 >
                   <div className="mb-4 flex items-start justify-between gap-3">
                     <h3 className="font-semibold leading-relaxed">
                       Q{index + 1}. {item.question}
                     </h3>
 
-                    <span className="shrink-0 rounded-lg bg-cyan-500/10 px-3 py-1 text-sm font-bold text-cyan-300">
+                    <span className="shrink-0 rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-sm font-bold text-blue-300">
                       {item.score}/10
                     </span>
                   </div>
 
-                  <p className="mb-2 text-xs font-semibold uppercase text-slate-500">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
                     Your answer
                   </p>
 
-                  <p className="mb-5 whitespace-pre-wrap text-sm text-slate-300">
+                  <p className="mb-5 whitespace-pre-wrap text-sm leading-relaxed text-slate-300">
                     {item.answer || "No answer provided."}
                   </p>
 
-                  <p className="mb-2 text-xs font-semibold uppercase text-slate-500">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
                     AI feedback
                   </p>
 
@@ -500,8 +590,9 @@ export default function MockInterviewPage() {
                     {item.feedback}
                   </p>
 
-                  <div className="rounded-xl bg-slate-950 p-4">
-                    <p className="mb-2 text-xs font-semibold uppercase text-cyan-400">
+                  <div className="rounded-xl border border-blue-500/10 bg-[#0B1220] p-4">
+                    <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-blue-400">
+                      <Lightbulb size={15} />
                       Example ideal answer
                     </p>
 
@@ -515,8 +606,9 @@ export default function MockInterviewPage() {
 
             <button
               onClick={restartInterview}
-              className="w-full rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-400"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3.5 font-semibold text-white transition hover:bg-blue-500"
             >
+              <RotateCcw size={18} />
               Start Another Interview
             </button>
           </div>

@@ -1,52 +1,21 @@
+
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
-export async function POST(request: Request) {
-  try {
-    const apiKey = process.env.GEMINI_API_KEY;
+const MODEL = "gemini-2.5-flash";
 
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: "Gemini API key is missing." },
-        { status: 500 }
-      );
-    }
+const sleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
-    // Get uploaded resume
-    const formData = await request.formData();
-    const file = formData.get("resume");
+function getErrorStatus(error: any): number | undefined {
+  return (
+    error?.status ??
+    error?.error?.code ??
+    error?.code
+  );
+}
 
-    // Validate file
-    if (!(file instanceof File)) {
-      return NextResponse.json(
-        { error: "Please upload a PDF resume." },
-        { status: 400 }
-      );
-    }
-
-    if (file.type !== "application/pdf") {
-      return NextResponse.json(
-        { error: "Only PDF files are supported." },
-        { status: 400 }
-      );
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: "Resume must be smaller than 5 MB." },
-        { status: 400 }
-      );
-    }
-
-    // Convert PDF to Base64
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const base64PDF = buffer.toString("base64");
-
-    // Initialize Gemini
-    const ai = new GoogleGenAI({ apiKey });
-
-    // Resume analysis prompt
-    const prompt = `
+const prompt = `
 You are a professional resume analyzer and career readiness evaluator.
 
 Read the attached resume carefully.
@@ -139,120 +108,316 @@ LEARNING ROADMAP REQUIREMENTS:
 Return JSON only. Do not include markdown or explanations.
 `;
 
-    // Call Gemini with retry handling for temporary service errors
-    let response;
+async function generateAnalysis(
+  ai: GoogleGenAI,
+  base64PDF: string
+) {
+  const maxAttempts = 3;
+  let lastError: any;
 
-    const maxAttempts = 3;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      console.log(
+        `Gemini request: ${MODEL}, attempt ${attempt}/${maxAttempts}`
+      );
 
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        response = await ai.models.generateContent({
-          model: "gemini-3.5-flash-lite",
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  inlineData: {
-                    mimeType: "application/pdf",
-                    data: base64PDF,
-                  },
-                },
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
-        });
-
-        // Gemini request succeeded
-        break;
-      } catch (error: any) {
-        const status = error?.status ?? error?.error?.code;
-
-        console.error(
-          `Gemini API attempt ${attempt} failed:`,
-          error
-        );
-
-        // Retry only temporary overload or rate-limit errors
-        if (
-          (status === 503 || status === 429) &&
-          attempt < maxAttempts
-        ) {
-          // Wait 2 seconds, then 4 seconds before retrying
-          await new Promise((resolve) =>
-            setTimeout(resolve, 2000 * attempt)
-          );
-
-          continue;
-        }
-
-        // No more retries
-        if (status === 503 || status === 429) {
-          return NextResponse.json(
-            {
-              error:
-                "Gemini is temporarily busy. Please wait a minute and try again.",
-            },
-            { status: 503 }
-          );
-        }
-
-        return NextResponse.json(
+      const response = await ai.models.generateContent({
+        model: MODEL,
+        contents: [
           {
-            error:
-              "Gemini API request failed. Check the VS Code terminal.",
+            role: "user",
+            parts: [
+              {
+                inlineData: {
+                  mimeType: "application/pdf",
+                  data: base64PDF,
+                },
+              },
+              {
+                text: prompt,
+              },
+            ],
           },
-          { status: 500 }
-        );
-      }
+        ],
+        config: {
+  responseMimeType: "application/json",
+  temperature: 0.2,
+  maxOutputTokens: 32768,
+},
+      });
+
+     const output = response.text;
+
+if (!output) {
+  throw new Error("Gemini returned an empty response.");
+}
+
+const finishReason =
+  response.candidates?.[0]?.finishReason;
+
+console.log("Gemini finish reason:", finishReason);
+
+if (finishReason === "MAX_TOKENS") {
+  throw new Error(
+    "Gemini reached its output token limit. The response was incomplete."
+  );
+}
+      const cleaned = output
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/\s*```$/i, "")
+        .trim();
+
+       try {
+  return JSON.parse(cleaned);
+} catch (error) {
+  console.error(
+    "Invalid or incomplete Gemini JSON response.",
+    {
+      outputLength: cleaned.length,
+      finishReason: response.candidates?.[0]?.finishReason,
+      ending: cleaned.slice(-300),
     }
+  );
 
-    // Check Gemini response
-    const output = response?.text;
+  throw new Error(
+    "Gemini returned incomplete or invalid JSON."
+  );
+}
+    } catch (error: any) {
+      lastError = error;
 
-    if (!output) {
+      const status = getErrorStatus(error);
+
+      console.error(`Gemini attempt ${attempt} failed:`, {
+        status,
+        message: error?.message,
+      });
+
+      // Retry temporary errors only.
+      if (
+        (status === 429 ||
+          status === 500 ||
+          status === 502 ||
+          status === 503 ||
+          status === 504) &&
+        attempt < maxAttempts
+      ) {
+        await sleep(3000 * attempt);
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  throw lastError ?? new Error("Gemini request failed.");
+}
+
+function validateAnalysis(analysis: any) {
+  if (!analysis || typeof analysis !== "object") {
+    return false;
+  }
+
+  if (
+    !Array.isArray(analysis.roleAnalysis) ||
+    analysis.roleAnalysis.length !== 9
+  ) {
+    return false;
+  }
+
+  if (
+    !Array.isArray(analysis.learningRoadmap) ||
+    analysis.learningRoadmap.length !== 9
+  ) {
+    return false;
+  }
+
+  const validRoles = [
+    "Software Engineer",
+    "Frontend Developer",
+    "Backend Developer",
+    "Full-Stack Developer",
+    "AI/ML Engineer",
+    "Data Analyst",
+    "Python Developer",
+    "Java Developer",
+    "Cloud/DevOps Engineer",
+  ];
+
+  const roleNames = analysis.roleAnalysis.map(
+    (item: any) => item.role
+  );
+
+  const roadmapNames = analysis.learningRoadmap.map(
+    (item: any) => item.role
+  );
+
+  if (
+    !validRoles.every((role) => roleNames.includes(role)) ||
+    !validRoles.every((role) => roadmapNames.includes(role))
+  ) {
+    return false;
+  }
+
+  for (const role of analysis.roleAnalysis) {
+    if (
+      typeof role.score !== "number" ||
+      role.score < 0 ||
+      role.score > 100 ||
+      !Array.isArray(role.matchingSkills) ||
+      !Array.isArray(role.missingSkills) ||
+      !Array.isArray(role.recommendations) ||
+      !Array.isArray(role.improvements)
+    ) {
+      return false;
+    }
+  }
+
+  for (const roadmap of analysis.learningRoadmap) {
+    if (
+      !Array.isArray(roadmap.steps) ||
+      roadmap.steps.length !== 4 ||
+      !roadmap.steps.every(
+        (step: any, index: number) =>
+          step.week === index + 1
+      )
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export async function POST(request: Request) {
+  try {
+    // Check API key
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
       return NextResponse.json(
-        { error: "Gemini returned an empty response." },
-        { status: 502 }
+        { error: "Gemini API key is missing." },
+        { status: 500 }
       );
     }
 
-    // Clean JSON response
-    const cleaned = output
-      .replace(/^```json\s*/i, "")
-      .replace(/^```\s*/i, "")
-      .replace(/\s*```$/i, "")
-      .trim();
+    // Get uploaded resume
+    const formData = await request.formData();
+    const file = formData.get("resume");
 
-    // Parse response
-    let analysis;
+    // Validate uploaded file
+    if (!(file instanceof File)) {
+      return NextResponse.json(
+        { error: "Please upload a PDF resume." },
+        { status: 400 }
+      );
+    }
 
-    try {
-      analysis = JSON.parse(cleaned);
-    } catch (error) {
-      console.error("Gemini returned invalid JSON:", output);
+    if (file.type !== "application/pdf") {
+      return NextResponse.json(
+        { error: "Only PDF files are supported." },
+        { status: 400 }
+      );
+    }
+
+    if (file.size === 0) {
+      return NextResponse.json(
+        { error: "The uploaded PDF is empty." },
+        { status: 400 }
+      );
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: "Resume must be smaller than 5 MB." },
+        { status: 400 }
+      );
+    }
+
+    // Convert PDF to Base64
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const base64PDF = buffer.toString("base64");
+
+    // Initialize Gemini
+    const ai = new GoogleGenAI({ apiKey });
+
+    // Generate analysis
+    const analysis = await generateAnalysis(ai, base64PDF);
+
+    // Validate returned analysis
+    if (!validateAnalysis(analysis)) {
+      console.error(
+        "Gemini returned an invalid analysis structure:",
+        analysis
+      );
 
       return NextResponse.json(
         {
           error:
-            "Gemini returned an invalid analysis. Please try uploading your resume again.",
+            "Gemini returned an incomplete analysis. Please try again.",
         },
         { status: 502 }
       );
     }
 
-    // Return analysis to frontend
+    console.log("Resume analysis completed successfully.");
+
     return NextResponse.json({ analysis });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Resume analysis error:", error);
+
+    const status = getErrorStatus(error);
+
+    if (status === 429) {
+      return NextResponse.json(
+        {
+          error:
+            "Gemini API rate limit reached. Please wait before trying again.",
+        },
+        { status: 429 }
+      );
+    }
+
+    if (
+      status === 500 ||
+      status === 502 ||
+      status === 503 ||
+      status === 504
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Gemini is temporarily unavailable. Please try again later.",
+        },
+        { status: 503 }
+      );
+    }
+
+    if (status === 400) {
+      return NextResponse.json(
+        {
+          error:
+            "Gemini rejected the request. Check the uploaded PDF and API request.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (status === 404) {
+      return NextResponse.json(
+        {
+          error:
+            `Gemini model '${MODEL}' was not found or is unavailable for this API version.`,
+        },
+        { status: 502 }
+      );
+    }
 
     return NextResponse.json(
       {
         error:
-          "Resume analysis failed. Check the VS Code terminal.",
+          "Resume analysis failed. Check the VS Code terminal for details.",
       },
       { status: 500 }
     );

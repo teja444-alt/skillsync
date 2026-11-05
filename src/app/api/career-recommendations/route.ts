@@ -4,34 +4,55 @@ import { GoogleGenAI } from "@google/genai";
 
 const MODEL = "gemini-3.5-flash-lite";
 
+const sleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
 async function callGemini(prompt: string) {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    throw new Error("Gemini API key is missing.");
+    throw new Error("GEMINI_API_KEY is missing from environment variables.");
   }
 
   const ai = new GoogleGenAI({ apiKey });
 
-  let response;
-
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
-      response = await ai.models.generateContent({
+      const response = await ai.models.generateContent({
         model: MODEL,
         contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          temperature: 0.4,
+        },
       });
 
-      break;
+      const output = response.text;
+
+      if (!output) {
+        throw new Error("Gemini returned an empty response.");
+      }
+
+      return JSON.parse(output);
     } catch (error: any) {
-      const status = error?.status ?? error?.error?.code;
+      const status =
+        error?.status ??
+        error?.error?.code ??
+        error?.code;
 
-      console.error(`Gemini attempt ${attempt} failed:`, error);
+      console.error(`Gemini attempt ${attempt} failed:`, {
+        status,
+        message: error?.message,
+      });
 
-      if ((status === 503 || status === 429) && attempt < 3) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, 2000 * attempt)
-        );
+      const retryable =
+        status === 429 ||
+        status === 503 ||
+        status === 500 ||
+        status === 504;
+
+      if (retryable && attempt < 3) {
+        await sleep(2000 * attempt);
         continue;
       }
 
@@ -39,19 +60,26 @@ async function callGemini(prompt: string) {
     }
   }
 
-  const output = response?.text;
+  throw new Error("Gemini request failed after retries.");
+}
 
-  if (!output) {
-    throw new Error("Gemini returned an empty response.");
-  }
-
-  const cleaned = output
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/\s*```$/i, "")
-    .trim();
-
-  return JSON.parse(cleaned);
+function isValidCareerPlan(data: any) {
+  return (
+    data &&
+    typeof data.careerSummary === "string" &&
+    typeof data.recommendedRole === "string" &&
+    typeof data.readinessLevel === "string" &&
+    Array.isArray(data.topPriorities) &&
+    data.topPriorities.length === 3 &&
+    Array.isArray(data.learningPlan) &&
+    data.learningPlan.length === 4 &&
+    Array.isArray(data.interviewAdvice) &&
+    data.interviewAdvice.length >= 2 &&
+    data.interviewAdvice.length <= 3 &&
+    Array.isArray(data.projectSuggestions) &&
+    data.projectSuggestions.length === 2 &&
+    typeof data.nextAction === "string"
+  );
 }
 
 export async function POST(request: Request) {
@@ -71,9 +99,15 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!Array.isArray(skillProgress) || !Array.isArray(interviewHistory)) {
+    if (
+      !Array.isArray(skillProgress) ||
+      !Array.isArray(interviewHistory)
+    ) {
       return NextResponse.json(
-        { error: "Skill progress and interview history must be arrays." },
+        {
+          error:
+            "Skill progress and interview history must be arrays.",
+        },
         { status: 400 }
       );
     }
@@ -92,46 +126,47 @@ ${JSON.stringify(skillProgress)}
 MOCK INTERVIEW HISTORY:
 ${JSON.stringify(interviewHistory)}
 
-IMPORTANT RULES:
-- Base recommendations only on the supplied data.
+RULES:
+- Base recommendations only on supplied data.
 - Do not invent skills, projects, experience, certificates, or achievements.
-- Give priority to important missing skills from the resume.
-- Do not recommend skills already marked completed unless they need revision.
+- Prioritize important missing resume skills.
+- Do not recommend completed skills unless they need revision.
 - Consider interview feedback and low-scoring answers.
-- If interview history is empty, do not pretend an interview has happened.
+- If interview history is empty, do not pretend an interview happened.
 - Recommend realistic tasks for a computer science engineering student.
-- Avoid generic advice such as "learn coding" or "practice more".
+- Avoid generic advice.
 - Explain why each recommendation matters.
-- Keep the plan actionable and achievable.
-- Do not guarantee employment or job placement.
+- Do not guarantee employment.
+- Select recommendedRole from the supplied resume role analysis whenever possible.
+- If there is insufficient evidence, use "Not enough data" for recommendedRole.
 
-Return ONLY valid JSON in this structure:
+Return a JSON object with exactly this structure:
 
 {
-  "careerSummary": "Short assessment of the candidate's current position.",
-  "recommendedRole": "Most suitable role based on the supplied evidence.",
+  "careerSummary": "Short assessment.",
+  "recommendedRole": "Suitable role or Not enough data.",
   "readinessLevel": "Beginner",
   "topPriorities": [
     {
       "priority": 1,
-      "title": "Specific skill or improvement",
-      "reason": "Why this should be prioritized",
-      "action": "Exact task the candidate should complete",
-      "estimatedTime": "Example: 3 days"
+      "title": "Specific skill",
+      "reason": "Why it matters",
+      "action": "Exact task",
+      "estimatedTime": "3 days"
     }
   ],
   "learningPlan": [
     {
       "week": 1,
-      "focus": "Main learning focus",
+      "focus": "Learning focus",
       "topics": ["Topic 1", "Topic 2"],
-      "task": "Specific practice task",
-      "project": "Small practical project",
+      "task": "Practice task",
+      "project": "Small project",
       "expectedOutcome": "Measurable outcome"
     }
   ],
   "interviewAdvice": [
-    "Specific interview improvement"
+    "Specific advice"
   ],
   "projectSuggestions": [
     {
@@ -141,34 +176,29 @@ Return ONLY valid JSON in this structure:
       "difficulty": "Beginner"
     }
   ],
-  "nextAction": "One clear action the candidate should take today."
+  "nextAction": "One clear action for today."
 }
 
 OUTPUT REQUIREMENTS:
-- Include exactly 3 topPriorities.
-- Include exactly 4 learningPlan items, one for each week.
-- Include 2 to 3 interviewAdvice items.
-- Include exactly 2 projectSuggestions.
-- Use readinessLevel: Beginner, Developing, Intermediate, or Job Ready.
-- Use project difficulty: Beginner, Intermediate, or Advanced.
-- Select recommendedRole from the supplied resume role analysis whenever possible.
-- If there is insufficient evidence to choose a role, say so in careerSummary and use "Not enough data" for recommendedRole.
-- Return valid JSON only. No markdown or explanations.
+- Exactly 3 topPriorities.
+- Exactly 4 learningPlan items, one for each week.
+- 2 to 3 interviewAdvice items.
+- Exactly 2 projectSuggestions.
+- readinessLevel must be Beginner, Developing, Intermediate, or Job Ready.
+- Project difficulty must be Beginner, Intermediate, or Advanced.
+- Return valid JSON only. No markdown.
 `;
 
     const recommendations = await callGemini(prompt);
 
-    if (
-      !recommendations ||
-      !Array.isArray(recommendations.topPriorities) ||
-      recommendations.topPriorities.length !== 3 ||
-      !Array.isArray(recommendations.learningPlan) ||
-      recommendations.learningPlan.length !== 4 ||
-      !Array.isArray(recommendations.projectSuggestions) ||
-      recommendations.projectSuggestions.length !== 2
-    ) {
+    if (!isValidCareerPlan(recommendations)) {
+      console.error("Invalid career plan structure:", recommendations);
+
       return NextResponse.json(
-        { error: "Gemini returned an incomplete career plan. Please try again." },
+        {
+          error:
+            "The AI returned an incomplete career plan. Please try again.",
+        },
         { status: 502 }
       );
     }
@@ -177,20 +207,43 @@ OUTPUT REQUIREMENTS:
   } catch (error: any) {
     console.error("Career recommendations error:", error);
 
-    const status = error?.status ?? error?.error?.code;
+    const status =
+      error?.status ??
+      error?.error?.code ??
+      error?.code;
 
-    if (status === 503 || status === 429) {
+    if (status === 429) {
       return NextResponse.json(
         {
-          error: "Gemini is temporarily busy. Please try again shortly.",
+          error: "Gemini API quota or rate limit reached. Try again later.",
+        },
+        { status: 429 }
+      );
+    }
+
+    if (status === 503 || status === 504) {
+      return NextResponse.json(
+        {
+          error: "Gemini is temporarily unavailable. Please try again shortly.",
         },
         { status: 503 }
       );
     }
 
+    if (status === 400 || status === 404) {
+      return NextResponse.json(
+        {
+          error:
+            "Gemini rejected the request. Check whether the configured model is available.",
+        },
+        { status: 502 }
+      );
+    }
+
     return NextResponse.json(
       {
-        error: "Career recommendations failed. Check the VS Code terminal.",
+        error:
+          "Career recommendations failed. Check the VS Code terminal for details.",
       },
       { status: 500 }
     );

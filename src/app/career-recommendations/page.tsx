@@ -19,6 +19,9 @@ import {
   Code2,
   Save,
   Check,
+  RefreshCw,
+  GraduationCap,
+  TrendingUp,
 } from "lucide-react";
 
 type Recommendation = {
@@ -205,23 +208,25 @@ export default function CareerRecommendationsPage() {
 
   if (loading || generating) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#09090b] px-5 text-white">
+      <main className="flex min-h-screen items-center justify-center bg-[#0B1220] px-5 text-slate-100">
         <div className="max-w-md text-center">
-          <BrainCircuit
-            size={42}
-            className="mx-auto animate-pulse text-violet-400"
-          />
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl border border-blue-500/20 bg-blue-500/10">
+            <BrainCircuit
+              size={42}
+              className="animate-pulse text-blue-400"
+            />
+          </div>
 
           <h1 className="mt-6 text-2xl font-bold">
             AI Career Recommendations
           </h1>
 
-          <p className="mt-3 text-sm leading-6 text-zinc-400">
+          <p className="mt-3 text-sm leading-6 text-slate-400">
             Gemini is analyzing your resume, completed skills,
             and mock interview performance.
           </p>
 
-          <div className="mt-6 flex items-center justify-center gap-2 text-sm text-violet-400">
+          <div className="mt-6 flex items-center justify-center gap-2 text-sm text-blue-400">
             <LoaderCircle size={18} className="animate-spin" />
             Generating your personalized career plan...
           </div>
@@ -231,29 +236,40 @@ export default function CareerRecommendationsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#09090b] px-4 py-8 text-white sm:px-8">
+    <main className="min-h-screen bg-[#0B1220] px-4 py-8 text-slate-100 sm:px-8">
       <div className="mx-auto max-w-6xl">
 
+        {/* Header */}
         <button
           onClick={() => router.push("/dashboard")}
-          className="mb-8 flex items-center gap-2 text-sm text-zinc-400 hover:text-white"
+          className="mb-8 flex items-center gap-2 text-sm text-slate-400 transition hover:text-blue-400"
         >
           <ArrowLeft size={18} />
           Back to Dashboard
         </button>
 
-        <p className="text-sm font-semibold uppercase tracking-widest text-violet-400">
-          SKILLSYNC AI
-        </p>
+        <div className="mb-8">
+          <div className="mb-3 flex items-center gap-2">
+            <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-2">
+              <BrainCircuit size={19} className="text-blue-400" />
+            </div>
 
-        <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
-          AI Career Recommendations
-        </h1>
+            <p className="text-sm font-semibold uppercase tracking-widest text-blue-400">
+              SkillSync AI
+            </p>
+          </div>
 
-        <p className="mt-3 text-zinc-400">
-          Your personalized career improvement plan, powered by Gemini.
-        </p>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            AI Career Recommendations
+          </h1>
 
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
+            Your personalized career improvement plan, powered by Gemini.
+            Get actionable guidance based on your skills and performance.
+          </p>
+        </div>
+
+        {/* Error */}
         {error && (
           <div className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
             {error}
@@ -263,33 +279,51 @@ export default function CareerRecommendationsPage() {
         {plan && (
           <>
             {/* Career Assessment */}
-            <section className="mt-8 rounded-2xl border border-violet-500/30 bg-violet-950/20 p-6 sm:p-8">
-              <div className="flex items-center gap-3">
-                <Sparkles className="text-violet-400" size={25} />
-                <h2 className="text-xl font-bold">
-                  Your Career Assessment
-                </h2>
+            <section className="mt-8 overflow-hidden rounded-2xl border border-blue-500/30 bg-[#111C30] p-6 sm:p-8">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-2.5">
+                    <Sparkles className="text-blue-400" size={24} />
+                  </div>
+
+                  <div>
+                    <h2 className="text-xl font-bold">
+                      Your Career Assessment
+                    </h2>
+                    <p className="mt-1 text-xs text-slate-400">
+                      AI-powered career evaluation
+                    </p>
+                  </div>
+                </div>
+
+                <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-300">
+                  Personalized Plan
+                </span>
               </div>
 
-              <p className="mt-5 leading-7 text-zinc-300">
+              <p className="mt-6 text-sm leading-7 text-slate-300 sm:text-base">
                 {plan.careerSummary}
               </p>
 
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-zinc-700 p-4">
-                  <p className="text-xs uppercase text-zinc-400">
+              <div className="mt-7 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-xl border border-slate-700/70 bg-[#0B1220]/60 p-5">
+                  <div className="flex items-center gap-2 text-sm text-slate-400">
+                    <Target size={17} className="text-blue-400" />
                     Recommended Role
-                  </p>
-                  <p className="mt-2 text-lg font-bold text-violet-300">
+                  </div>
+
+                  <p className="mt-3 text-lg font-bold text-blue-300">
                     {plan.recommendedRole}
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-zinc-700 p-4">
-                  <p className="text-xs uppercase text-zinc-400">
+                <div className="rounded-xl border border-slate-700/70 bg-[#0B1220]/60 p-5">
+                  <div className="flex items-center gap-2 text-sm text-slate-400">
+                    <TrendingUp size={17} className="text-cyan-400" />
                     Current Readiness
-                  </p>
-                  <p className="mt-2 text-lg font-bold text-cyan-300">
+                  </div>
+
+                  <p className="mt-3 text-lg font-bold text-cyan-300">
                     {plan.readinessLevel}
                   </p>
                 </div>
@@ -301,7 +335,7 @@ export default function CareerRecommendationsPage() {
               <button
                 onClick={saveCareerPlan}
                 disabled={saving || saved}
-                className="flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-6 py-3 font-semibold hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {saving ? (
                   <LoaderCircle size={18} className="animate-spin" />
@@ -320,14 +354,14 @@ export default function CareerRecommendationsPage() {
 
               <button
                 onClick={() => router.push("/saved-career-plans")}
-                className="rounded-xl border border-zinc-700 px-6 py-3 font-semibold hover:bg-zinc-900"
+                className="rounded-xl border border-slate-700 bg-[#111C30] px-6 py-3 font-semibold text-slate-200 transition hover:border-blue-500/50 hover:bg-blue-500/10"
               >
                 View Saved Plans
               </button>
             </div>
 
             {/* Top Priorities */}
-            <section className="mt-10">
+            <section className="mt-12">
               <SectionHeading
                 icon={<Target size={23} />}
                 title="Your Top 3 Priorities"
@@ -338,31 +372,38 @@ export default function CareerRecommendationsPage() {
                 {plan.topPriorities.map((item) => (
                   <div
                     key={item.priority}
-                    className="rounded-2xl border border-zinc-800 bg-[#111114] p-5"
+                    className="rounded-2xl border border-slate-800 bg-[#111C30] p-5 transition duration-300 hover:-translate-y-1 hover:border-blue-500/40"
                   >
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10 font-bold text-violet-400">
-                      {item.priority}
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 font-bold text-blue-400">
+                        {item.priority}
+                      </span>
 
-                    <h3 className="mt-4 font-bold">
+                      <span className="text-xs font-semibold text-slate-500">
+                        PRIORITY
+                      </span>
+                    </div>
+
+                    <h3 className="mt-5 font-bold text-slate-100">
                       {item.title}
                     </h3>
 
-                    <p className="mt-3 text-sm leading-6 text-zinc-400">
+                    <p className="mt-3 text-sm leading-6 text-slate-400">
                       {item.reason}
                     </p>
 
-                    <div className="mt-4 rounded-lg bg-zinc-900 p-3">
-                      <p className="text-xs font-semibold uppercase text-violet-400">
+                    <div className="mt-5 rounded-xl border border-blue-500/10 bg-[#0B1220] p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-blue-400">
                         Action to take
                       </p>
-                      <p className="mt-2 text-sm leading-6 text-zinc-300">
+
+                      <p className="mt-2 text-sm leading-6 text-slate-300">
                         {item.action}
                       </p>
                     </div>
 
-                    <p className="mt-4 flex items-center gap-2 text-xs text-zinc-500">
-                      <Clock size={14} />
+                    <p className="mt-4 flex items-center gap-2 text-xs text-slate-500">
+                      <Clock size={14} className="text-blue-400" />
                       {item.estimatedTime}
                     </p>
                   </div>
@@ -382,32 +423,34 @@ export default function CareerRecommendationsPage() {
                 {plan.learningPlan.map((week) => (
                   <div
                     key={week.week}
-                    className="rounded-2xl border border-zinc-800 bg-[#111114] p-6"
+                    className="rounded-2xl border border-slate-800 bg-[#111C30] p-5 sm:p-6"
                   >
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="rounded-lg bg-violet-500/10 px-3 py-2 text-sm font-bold text-violet-400">
+                      <span className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-2 text-sm font-bold text-blue-400">
                         WEEK {week.week}
                       </span>
-                      <h3 className="text-lg font-bold">
+
+                      <h3 className="text-lg font-bold text-slate-100">
                         {week.focus}
                       </h3>
                     </div>
 
-                    <div className="mt-5 grid gap-5 md:grid-cols-2">
+                    <div className="mt-6 grid gap-6 md:grid-cols-2">
                       <div>
-                        <p className="text-xs font-semibold uppercase text-zinc-500">
+                        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          <BookOpen size={15} className="text-blue-400" />
                           Topics to learn
                         </p>
 
-                        <ul className="mt-3 space-y-2">
+                        <ul className="mt-4 space-y-3">
                           {week.topics.map((topic, index) => (
                             <li
                               key={index}
-                              className="flex items-start gap-2 text-sm text-zinc-300"
+                              className="flex items-start gap-2 text-sm leading-6 text-slate-300"
                             >
                               <CheckCircle2
-                                size={16}
-                                className="mt-0.5 shrink-0 text-green-400"
+                                size={17}
+                                className="mt-0.5 shrink-0 text-blue-400"
                               />
                               {topic}
                             </li>
@@ -416,28 +459,32 @@ export default function CareerRecommendationsPage() {
                       </div>
 
                       <div>
-                        <p className="text-xs font-semibold uppercase text-zinc-500">
+                        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          <Target size={15} className="text-cyan-400" />
                           Practice task
                         </p>
-                        <p className="mt-3 text-sm leading-6 text-zinc-300">
+
+                        <p className="mt-3 text-sm leading-6 text-slate-300">
                           {week.task}
                         </p>
 
-                        <p className="mt-5 text-xs font-semibold uppercase text-violet-400">
+                        <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-cyan-400">
                           Expected outcome
                         </p>
-                        <p className="mt-2 text-sm leading-6 text-zinc-300">
+
+                        <p className="mt-2 text-sm leading-6 text-slate-300">
                           {week.expectedOutcome}
                         </p>
                       </div>
                     </div>
 
-                    <div className="mt-5 rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
-                      <p className="flex items-center gap-2 text-sm font-semibold text-cyan-300">
+                    <div className="mt-6 rounded-xl border border-slate-700/70 bg-[#0B1220]/70 p-4">
+                      <p className="flex items-center gap-2 text-sm font-semibold text-blue-300">
                         <Code2 size={17} />
                         Weekly Project
                       </p>
-                      <p className="mt-2 text-sm leading-6 text-zinc-300">
+
+                      <p className="mt-2 text-sm leading-6 text-slate-300">
                         {week.project}
                       </p>
                     </div>
@@ -454,17 +501,20 @@ export default function CareerRecommendationsPage() {
                 description="Recommendations based on your interview performance."
               />
 
-              <div className="mt-5 rounded-2xl border border-zinc-800 bg-[#111114] p-6">
-                <ul className="space-y-4">
+              <div className="mt-5 rounded-2xl border border-slate-800 bg-[#111C30] p-6">
+                <ul className="space-y-5">
                   {plan.interviewAdvice.map((advice, index) => (
                     <li
                       key={index}
-                      className="flex items-start gap-3 text-sm leading-6 text-zinc-300"
+                      className="flex items-start gap-3 text-sm leading-6 text-slate-300"
                     >
-                      <CheckCircle2
-                        size={18}
-                        className="mt-0.5 shrink-0 text-green-400"
-                      />
+                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
+                        <CheckCircle2
+                          size={17}
+                          className="text-blue-400"
+                        />
+                      </div>
+
                       {advice}
                     </li>
                   ))}
@@ -484,23 +534,29 @@ export default function CareerRecommendationsPage() {
                 {plan.projectSuggestions.map((project, index) => (
                   <div
                     key={index}
-                    className="rounded-2xl border border-zinc-800 bg-[#111114] p-6"
+                    className="rounded-2xl border border-slate-800 bg-[#111C30] p-6 transition duration-300 hover:border-blue-500/40"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-lg font-bold">
-                        {project.title}
-                      </h3>
+                      <div className="flex items-start gap-3">
+                        <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-2">
+                          <Code2 size={20} className="text-blue-400" />
+                        </div>
 
-                      <span className="shrink-0 rounded-full bg-cyan-500/10 px-3 py-1 text-xs text-cyan-300">
+                        <h3 className="pt-1 text-lg font-bold text-slate-100">
+                          {project.title}
+                        </h3>
+                      </div>
+
+                      <span className="shrink-0 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-300">
                         {project.difficulty}
                       </span>
                     </div>
 
-                    <p className="mt-3 text-sm leading-6 text-zinc-400">
+                    <p className="mt-4 text-sm leading-6 text-slate-400">
                       {project.description}
                     </p>
 
-                    <p className="mt-5 text-xs font-semibold uppercase text-zinc-500">
+                    <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-slate-500">
                       Skills involved
                     </p>
 
@@ -508,7 +564,7 @@ export default function CareerRecommendationsPage() {
                       {project.skillsUsed.map((skill, index) => (
                         <span
                           key={index}
-                          className="rounded-lg bg-violet-500/10 px-3 py-1.5 text-xs text-violet-300"
+                          className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-xs text-blue-300"
                         >
                           {skill}
                         </span>
@@ -520,23 +576,37 @@ export default function CareerRecommendationsPage() {
             </section>
 
             {/* Next Action */}
-            <section className="mt-12 rounded-2xl border border-green-500/30 bg-green-500/5 p-6">
+            <section className="mt-12 rounded-2xl border border-blue-500/30 bg-[#111C30] p-6 sm:p-7">
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="text-green-400" size={25} />
-                <h2 className="text-lg font-bold">
-                  Your Next Action
-                </h2>
+                <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-2.5">
+                  <GraduationCap
+                    className="text-blue-400"
+                    size={24}
+                  />
+                </div>
+
+                <div>
+                  <h2 className="text-lg font-bold">
+                    Your Next Action
+                  </h2>
+
+                  <p className="mt-1 text-xs text-slate-500">
+                    Your recommended next step
+                  </p>
+                </div>
               </div>
 
-              <p className="mt-4 leading-7 text-zinc-300">
+              <p className="mt-5 text-sm leading-7 text-slate-300">
                 {plan.nextAction}
               </p>
             </section>
 
+            {/* Regenerate */}
             <button
               onClick={generateRecommendations}
-              className="mt-8 w-full rounded-xl border border-zinc-700 px-5 py-3 font-semibold text-zinc-300 hover:bg-zinc-900"
+              className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-700 bg-[#111C30] px-5 py-3 font-semibold text-slate-300 transition hover:border-blue-500/50 hover:bg-blue-500/10 hover:text-blue-300"
             >
+              <RefreshCw size={18} />
               Generate Updated Recommendations
             </button>
           </>
@@ -558,11 +628,14 @@ function SectionHeading({
   return (
     <div>
       <div className="flex items-center gap-3">
-        <span className="text-violet-400">{icon}</span>
-        <h2 className="text-xl font-bold">{title}</h2>
+        <span className="text-blue-400">{icon}</span>
+
+        <h2 className="text-xl font-bold text-slate-100">
+          {title}
+        </h2>
       </div>
 
-      <p className="mt-2 text-sm text-zinc-400">
+      <p className="mt-2 text-sm text-slate-400">
         {description}
       </p>
     </div>

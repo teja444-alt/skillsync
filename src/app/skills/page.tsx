@@ -287,30 +287,33 @@ export default function SkillsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#09090b] text-white">
+    <main className="min-h-screen bg-[#0B1220] text-slate-100">
       <div className="mx-auto max-w-6xl px-5 py-8">
 
         {/* Header */}
         <div className="mb-8">
           <Link
             href="/dashboard"
-            className="mb-6 inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white"
+            className="mb-6 inline-flex items-center gap-2 text-sm text-slate-400 transition hover:text-blue-400"
           >
             <ArrowLeft size={17} />
             Back to Dashboard
           </Link>
 
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-violet-500/15 p-3">
-              <Target className="text-violet-400" size={28} />
+            <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-3">
+              <Target className="text-blue-400" size={28} />
             </div>
 
             <div>
-              <h1 className="text-3xl font-bold">
+              <p className="text-sm font-semibold tracking-wider text-blue-400">
+                SKILLSYNC AI
+              </p>
+              <h1 className="text-3xl font-bold tracking-tight">
                 AI Skill Gap Tracker
               </h1>
 
-              <p className="mt-1 text-zinc-400">
+              <p className="mt-1 text-slate-400">
                 Discover your missing skills using your actual resume analysis.
               </p>
             </div>
@@ -319,8 +322,8 @@ export default function SkillsPage() {
 
         {/* Loading */}
         {loading && (
-          <div className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-[#111114] p-6 text-zinc-300">
-            <Loader2 className="animate-spin" />
+          <div className="flex items-center gap-3 rounded-xl border border-slate-700/70 bg-[#111C30] p-6 text-slate-300">
+            <Loader2 className="animate-spin text-blue-400" />
             Loading your AI skill analysis...
           </div>
         )}
@@ -335,23 +338,23 @@ export default function SkillsPage() {
 
         {/* No resume */}
         {!loading && !error && roles.length === 0 && (
-          <section className="rounded-2xl border border-zinc-800 bg-[#111114] p-8 text-center">
+          <section className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-8 text-center">
             <BrainCircuit
               size={42}
-              className="mx-auto text-violet-400"
+              className="mx-auto text-blue-400"
             />
 
             <h2 className="mt-4 text-xl font-bold">
               Resume Analysis Required
             </h2>
 
-            <p className="mt-2 text-sm text-zinc-400">
+            <p className="mt-2 text-sm text-slate-400">
               Upload your resume first. SkillSync will identify matching and missing skills for all 9 job roles.
             </p>
 
             <Link
               href="/resume"
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-3 font-semibold hover:bg-violet-500"
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-500"
             >
               Analyze My Resume
             </Link>
@@ -363,10 +366,10 @@ export default function SkillsPage() {
             {/* Overall Progress */}
             <section className="mb-8 grid gap-5 md:grid-cols-3">
 
-              <div className="rounded-2xl border border-zinc-800 bg-[#111114] p-6 md:col-span-2">
+              <div className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-6 md:col-span-2">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-zinc-400">
+                    <p className="text-sm text-slate-400">
                       Missing Skills Completion
                     </p>
 
@@ -375,33 +378,33 @@ export default function SkillsPage() {
                     </h2>
                   </div>
 
-                  <div className="rounded-xl bg-violet-500/15 p-3">
+                  <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-3">
                     <Trophy
-                      className="text-violet-400"
+                      className="text-blue-400"
                       size={28}
                     />
                   </div>
                 </div>
 
-                <div className="h-3 overflow-hidden rounded-full bg-zinc-800">
+                <div className="h-3 overflow-hidden rounded-full bg-slate-800">
                   <div
-                    className="h-full rounded-full bg-violet-500 transition-all"
+                    className="h-full rounded-full bg-blue-500 transition-all"
                     style={{ width: `${overallProgress}%` }}
                   />
                 </div>
 
-                <p className="mt-3 text-sm text-zinc-400">
+                <p className="mt-3 text-sm text-slate-400">
                   {totalCompleted} of {totalSkills} missing skills completed across {roles.length} job roles.
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-zinc-800 bg-[#111114] p-6">
+              <div className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-6">
                 <BookOpen
-                  className="mb-3 text-violet-400"
+                  className="mb-3 text-blue-400"
                   size={26}
                 />
 
-                <p className="text-sm text-zinc-400">
+                <p className="text-sm text-slate-400">
                   Analyzed Job Roles
                 </p>
 
@@ -409,7 +412,7 @@ export default function SkillsPage() {
                   {roles.length}
                 </h2>
 
-                <p className="mt-2 text-sm text-zinc-500">
+                <p className="mt-2 text-sm text-slate-500">
                   Retrieved from your latest resume
                 </p>
               </div>
@@ -431,8 +434,8 @@ export default function SkillsPage() {
                     }}
                     className={`rounded-xl border p-4 text-left transition ${
                       selectedRole === item.role
-                        ? "border-violet-500 bg-violet-500/10"
-                        : "border-zinc-800 bg-[#111114] hover:border-zinc-600"
+                        ? "border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/5"
+                        : "border-slate-700/70 bg-[#111C30] hover:border-blue-500/50"
                     }`}
                   >
                     <div className="mb-3 flex items-center justify-between gap-2">
@@ -440,19 +443,19 @@ export default function SkillsPage() {
                         {item.role}
                       </span>
 
-                      <span className="text-sm font-bold text-violet-300">
+                      <span className="text-sm font-bold text-blue-300">
                         {item.score}/100
                       </span>
                     </div>
 
-                    <div className="mb-3 h-2 overflow-hidden rounded-full bg-zinc-800">
+                    <div className="mb-3 h-2 overflow-hidden rounded-full bg-slate-800">
                       <div
-                        className="h-full rounded-full bg-violet-500"
+                        className="h-full rounded-full bg-blue-500"
                         style={{ width: `${item.score}%` }}
                       />
                     </div>
 
-                    <p className="text-xs text-zinc-400">
+                    <p className="text-xs text-slate-400">
                       {item.completed}/{item.total} missing skills completed
                     </p>
                   </button>
@@ -462,11 +465,11 @@ export default function SkillsPage() {
 
             {/* Selected Role */}
             {currentRole && (
-              <section className="rounded-2xl border border-zinc-800 bg-[#111114] p-6">
+              <section className="rounded-2xl border border-slate-700/70 bg-[#111C30] p-6">
 
                 <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm text-violet-400">
+                    <p className="text-sm font-semibold tracking-wider text-blue-400">
                       AI RESUME ANALYSIS
                     </p>
 
@@ -474,9 +477,9 @@ export default function SkillsPage() {
                       {currentRole.role}
                     </h2>
 
-                    <p className="mt-2 text-sm text-zinc-400">
+                    <p className="mt-2 text-sm text-slate-400">
                       Resume readiness:{" "}
-                      <span className="font-semibold text-violet-300">
+                      <span className="font-semibold text-blue-300">
                         {currentRole.score}/100
                       </span>
                       {" · "}
@@ -484,12 +487,12 @@ export default function SkillsPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-violet-500/15 px-4 py-3 text-center">
-                    <p className="text-2xl font-bold text-violet-300">
+                  <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-3 text-center">
+                    <p className="text-2xl font-bold text-blue-300">
                       {progressPercentage}%
                     </p>
 
-                    <p className="text-xs text-zinc-400">
+                    <p className="text-xs text-slate-400">
                       Missing skills completed
                     </p>
                   </div>
@@ -514,7 +517,7 @@ export default function SkillsPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-zinc-500">
+                    <p className="text-sm text-slate-500">
                       No matching skills identified.
                     </p>
                   )}
@@ -527,13 +530,13 @@ export default function SkillsPage() {
                     Missing Skills — Your Learning Checklist
                   </h3>
 
-                  <p className="mb-4 text-sm text-zinc-400">
+                  <p className="mb-4 text-sm text-slate-400">
                     Learn these skills and mark them as completed when you have genuinely practiced them.
                   </p>
 
-                  <div className="mb-6 h-3 overflow-hidden rounded-full bg-zinc-800">
+                  <div className="mb-6 h-3 overflow-hidden rounded-full bg-slate-800">
                     <div
-                      className="h-full rounded-full bg-violet-500 transition-all"
+                      className="h-full rounded-full bg-blue-500 transition-all"
                       style={{
                         width: `${progressPercentage}%`,
                       }}
@@ -555,13 +558,13 @@ export default function SkillsPage() {
                             className={`flex w-full items-center gap-4 rounded-xl border p-4 text-left transition ${
                               isCompleted
                                 ? "border-emerald-500/30 bg-emerald-500/5"
-                                : "border-zinc-800 bg-black/30 hover:border-violet-500/50"
+                                : "border-slate-700/70 bg-[#0B1220] hover:border-blue-500/50"
                             } disabled:cursor-wait`}
                           >
                             {isSaving ? (
                               <Loader2
                                 size={22}
-                                className="shrink-0 animate-spin text-violet-400"
+                                className="shrink-0 animate-spin text-blue-400"
                               />
                             ) : isCompleted ? (
                               <CheckCircle2
@@ -571,7 +574,7 @@ export default function SkillsPage() {
                             ) : (
                               <Circle
                                 size={22}
-                                className="shrink-0 text-zinc-500"
+                                className="shrink-0 text-slate-500"
                               />
                             )}
 
@@ -580,13 +583,13 @@ export default function SkillsPage() {
                                 className={`block font-medium ${
                                   isCompleted
                                     ? "text-emerald-300 line-through"
-                                    : "text-zinc-200"
+                                    : "text-slate-200"
                                 }`}
                               >
                                 {skill}
                               </span>
 
-                              <span className="mt-1 block text-xs text-zinc-500">
+                              <span className="mt-1 block text-xs text-slate-500">
                                 Skill {index + 1} of {skills.length}
                               </span>
                             </span>
@@ -595,7 +598,7 @@ export default function SkillsPage() {
                               className={`text-xs ${
                                 isCompleted
                                   ? "text-emerald-400"
-                                  : "text-zinc-500"
+                                  : "text-slate-500"
                               }`}
                             >
                               {isCompleted
@@ -617,7 +620,7 @@ export default function SkillsPage() {
                         No Missing Skills Listed!
                       </h3>
 
-                      <p className="mt-2 text-sm text-zinc-400">
+                      <p className="mt-2 text-sm text-slate-400">
                         Your AI analysis did not identify any missing skills for this role.
                       </p>
                     </div>
@@ -626,8 +629,8 @@ export default function SkillsPage() {
 
                 {/* Recommendations */}
                 {currentRole.recommendations.length > 0 && (
-                  <div className="mt-7 rounded-xl border border-violet-500/20 bg-violet-500/5 p-5">
-                    <h3 className="font-semibold text-violet-300">
+                  <div className="mt-7 rounded-xl border border-blue-500/20 bg-blue-500/5 p-5">
+                    <h3 className="font-semibold text-blue-300">
                       AI Learning Recommendations
                     </h3>
 
@@ -636,7 +639,7 @@ export default function SkillsPage() {
                         (item, index) => (
                           <li
                             key={`${item}-${index}`}
-                            className="text-sm leading-6 text-zinc-300"
+                            className="text-sm leading-6 text-slate-300"
                           >
                             • {item}
                           </li>
@@ -658,7 +661,7 @@ export default function SkillsPage() {
                         Missing Skills Checklist Completed!
                       </h3>
 
-                      <p className="mt-1 text-sm text-zinc-400">
+                      <p className="mt-1 text-sm text-slate-400">
                         You have marked every missing skill as completed. Make sure you can demonstrate them in practice.
                       </p>
                     </div>
@@ -673,7 +676,7 @@ export default function SkillsPage() {
             )}
 
             {/* Progress Across Roles */}
-            <section className="mt-8 rounded-2xl border border-zinc-800 bg-[#111114] p-6">
+            <section className="mt-8 rounded-2xl border border-slate-700/70 bg-[#111C30] p-6">
               <h2 className="mb-5 text-xl font-bold">
                 Your Progress Across Job Roles
               </h2>
@@ -682,18 +685,18 @@ export default function SkillsPage() {
                 {allRoleProgress.map((item) => (
                   <div key={item.role}>
                     <div className="mb-2 flex justify-between gap-3 text-sm">
-                      <span className="text-zinc-300">
+                      <span className="text-slate-300">
                         {item.role}
                       </span>
 
-                      <span className="text-zinc-400">
+                      <span className="text-slate-400">
                         {item.completed}/{item.total} · {item.percentage}%
                       </span>
                     </div>
 
-                    <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
+                    <div className="h-2 overflow-hidden rounded-full bg-slate-800">
                       <div
-                        className="h-full rounded-full bg-violet-500 transition-all"
+                        className="h-full rounded-full bg-blue-500 transition-all"
                         style={{
                           width: `${item.percentage}%`,
                         }}
@@ -705,18 +708,18 @@ export default function SkillsPage() {
             </section>
 
             {/* Roadmap Link */}
-            <div className="mt-8 rounded-2xl border border-violet-500/20 bg-violet-500/5 p-6">
+            <div className="mt-8 rounded-2xl border border-blue-500/20 bg-blue-500/5 p-6">
               <h2 className="text-xl font-bold">
                 Ready to improve your skills?
               </h2>
 
-              <p className="mt-2 text-sm text-zinc-400">
+              <p className="mt-2 text-sm text-slate-400">
                 Follow your personalized learning roadmap to work on your missing skills.
               </p>
 
               <Link
                 href="/resume"
-                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold hover:bg-violet-500"
+                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500"
               >
                 View Learning Roadmaps
                 <BookOpen size={16} />
